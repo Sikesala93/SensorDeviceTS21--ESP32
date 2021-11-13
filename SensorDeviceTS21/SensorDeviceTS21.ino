@@ -104,8 +104,36 @@ void onDisconnectMorse(){
   dah();
   di();
   di();
+  delay(morsePause*2); 
+}
+
+void helloMorse(){
+  //H
+  di();
+  di();
+  di();
+  di();
+  delay(morsePause);
+  // E
+  di();
+  delay(morsePause);
+  //L
+  di();
+  dah();
+  di();
+  di();
+  delay(morsePause);
+  //L
+  di();
+  dah();
+  di();
+  di();
+  delay(morsePause);
+  // O 
+  dah();
+  dah();
+  dah();
   delay(morsePause*2);
-  
 }
 
 class MyServerCallbacks: public BLEServerCallbacks {
@@ -147,6 +175,8 @@ void setup() {
   pinMode(LedPin, OUTPUT);
   pinMode(PIRPin, INPUT);
   pinMode(SummeriPin, OUTPUT);
+  helloMorse();
+  delay(1000);
   
 }
 
