@@ -11,12 +11,6 @@
 #define LedPin 15
 #define BUZZ_CHAN 0
 
-// See the following for generating UUIDs:
-// https://www.uuidgenerator.net/
-#define SERVICE_UUID        "877a5e9a-74ae-4403-bfef-dc4c3fe2179f"
-#define CHARACTERISTIC_UUID "040983c3-bbcd-4311-b270-4e530359ad27"
-bool deviceConnected = false;
-
 // Morsekoodit----------------------------------------------------------------
 
 // Morsen pauseväli
@@ -139,17 +133,24 @@ void helloMorse(){
 }
 // Morsetukset loppuu ------------------------------------------------------------------
 
+// See the following for generating UUIDs:
+// https://www.uuidgenerator.net/
+#define SERVICE_UUID        "877a5e9a-74ae-4403-bfef-dc4c3fe2179f"
+#define CHARACTERISTIC_UUID "040983c3-bbcd-4311-b270-4e530359ad27"
+bool deviceConnected = false;
 
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
       Serial.println("onConnect");
       onConnectMorse();
+      digitalWrite(LedPin, HIGH);
       deviceConnected = true;
     };
 
     void onDisconnect(BLEServer* pServer) {   
       Serial.println("onDisconnect");
       onDisconnectMorse();
+      digitalWrite(LedPin, LOW);
       deviceConnected = false;
     }
 };
@@ -170,8 +171,6 @@ class MyCallbacks: public BLECharacteristicCallbacks {
     }
 };
 
-
-
 BLECharacteristic *pCharacteristic ;
 
 void setup() {
@@ -179,6 +178,30 @@ void setup() {
   pinMode(LedPin, OUTPUT);
   pinMode(PIRPin, INPUT);
   pinMode(SummeriPin, OUTPUT);
+
+  Serial.println("R5ESP");
+  
+  BLEDevice::init("R5ESP");
+  BLEServer *pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new MyServerCallbacks());
+  BLEService *pService = pServer->createService(SERVICE_UUID);
+  
+  pCharacteristic = pService->createCharacteristic(
+                      CHARACTERISTIC_UUID,
+                      BLECharacteristic::PROPERTY_READ   |
+                      BLECharacteristic::PROPERTY_WRITE  |
+                      BLECharacteristic::PROPERTY_NOTIFY |
+                      BLECharacteristic::PROPERTY_INDICATE
+                    );
+
+  pCharacteristic->setCallbacks(new MyCallbacks());
+  //pCharacteristic->addDescriptor(new BLE2902());
+  pService->start();
+
+  BLEAdvertising *pAdvertising = pServer->getAdvertising();
+  pAdvertising->start();
+  
+  
   helloMorse();
   delay(1000);
   
@@ -186,12 +209,11 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if(digitalRead(PIRPin) == HIGH){
-    digitalWrite(LedPin, HIGH);
-    tone(SummeriPin, NOTE_C6, 100, BUZZ_CHAN);
-  }else{
-    digitalWrite(LedPin, LOW);
-    noTone(SummeriPin, BUZZ_CHAN);
+  if(digitalRead(PIRPin) == HIGH ){
+    int movement = 1;
+    pCharacteristic->setValue(movement);
+    pCharacteristic->notify();
+    Serial.println("Movement Detetected!");   
   }
   delay(100);
 }
