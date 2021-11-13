@@ -15,11 +15,14 @@
 // https://www.uuidgenerator.net/
 #define SERVICE_UUID        "877a5e9a-74ae-4403-bfef-dc4c3fe2179f"
 #define CHARACTERISTIC_UUID "040983c3-bbcd-4311-b270-4e530359ad27"
-// Lenght for morse space
-int morsePause = 90;
 bool deviceConnected = false;
 
-// Di ja dah morsetukseen
+// Morsekoodit----------------------------------------------------------------
+
+// Morsen pauseväli
+int morsePause = 90;
+
+// Di ja dah
 void di(){
   tone(SummeriPin, NOTE_G6, 30, BUZZ_CHAN);
   noTone(SummeriPin, BUZZ_CHAN);
@@ -28,7 +31,8 @@ void dah(){
   tone(SummeriPin, NOTE_G6, 90, BUZZ_CHAN);
   noTone(SummeriPin, BUZZ_CHAN);
 }
-// connect ja disconnect morsetukset
+
+// connect, disconnect ja hello morsetukset
 void onConnectMorse() {
   // B
   dah();
@@ -49,7 +53,6 @@ void onConnectMorse() {
   di();
   dah();
   delay(morsePause*2);
-  
 }
 void onDisconnectMorse(){
   // D
@@ -106,7 +109,6 @@ void onDisconnectMorse(){
   di();
   delay(morsePause*2); 
 }
-
 void helloMorse(){
   //H
   di();
@@ -135,6 +137,8 @@ void helloMorse(){
   dah();
   delay(morsePause*2);
 }
+// Morsetukset loppuu ------------------------------------------------------------------
+
 
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
